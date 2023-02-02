@@ -1,0 +1,24 @@
+import os
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
+url = 'https://dados.antt.gov.br/dataset/monitriip-bilhetes-de-passagem'
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+links = []
+for link in soup.find_all('a'):
+    href = link.get('href')
+    if href.endswith('.csv'):
+        links.append(href)
+
+directory = os.path.join('', '')
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+for link in links:
+    df = pd.read_csv(link,encoding='ISO-8859-1', sep='\t')
+    filename = os.path.join(directory, link.split('/')[-1])
+    df.to_csv(filename, index=False)
